@@ -10,7 +10,7 @@ const mongoose = require('mongoose');
 const nodeFetch = require('node-fetch');
 const bodyParser = require("body-parser");
 const winston = require('winston');
-const toYAML = require('winston-console-formatter'); // makes the output more friendly
+const wcf = require('winston-console-formatter'); // makes the output more friendly
 
 require('dotenv').config();
 
@@ -46,7 +46,7 @@ const createLogger = () => {
     const logger = new winston.Logger({
         level: "debug"
     }); // We recommend DEBUG for development
-    logger.add(winston.transports.Console, toYAML.config());
+    logger.add(winston.transports.Console, wcf());
     return logger;
 }
 
