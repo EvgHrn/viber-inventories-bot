@@ -10,6 +10,11 @@ const mongoose = require('mongoose');
 const nodeFetch = require('node-fetch');
 const bodyParser = require("body-parser");
 
+const user = process.env.DB_USER;
+const pwd = process.env.DB_PWD;
+const dbPort = process.env.DB_PORT;
+const addr = process.env.DB_ADDR;
+
 mongoose.connect(`mongodb://${user}:${pwd}@${addr}:${dbPort}/timesheetsblocks?authSource=admin`, {useNewUrlParser: true, useUnifiedTopology: true});
 
 const mongodb = mongoose.connection;
@@ -32,6 +37,43 @@ const inventoriesViberMailingSchema = new mongoose.Schema({
     }]
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 const InventoriesViberMailing = mongoose.model('InventoriesViberMailing', inventoriesViberMailingSchema);
+
+const bot = new ViberBot({
+    authToken: process.env.TOKEN,
+    name: "Описи",
+    avatar: "http://viber.com/avatar.jpg" // It is recommended to be 720x720, and no more than 100kb.
+});
+
+bot.on(BotEvents.MESSAGE_RECEIVED, async(message, response) => {
+    console.log('----------------------------------------------------------------');
+    console.log(`${new Date().toLocaleString('ru')} New message: `, message.text);
+    console.log('From: ', response.userProfile.id, );
+    console.log('Name: ', response.userProfile.name);
+
+    bot.sendMessage({id: process.env.ADMIN_ID}, new TextMessage(`New message from user: ${response.userProfile.id} ${response.userProfile.name}: ${message.text}`));
+
+    const newItem = await addAndDeleteViberUserIdToDirection(response.userProfile.id, message.text);
+
+    if(!newItem) {
+        response.send(new TextMessage(`Ошибка добавления города`));
+        // @ts-ignore
+        await sendServiceMessage(`viber-inventories: Ошибка получения/добавления города у ${response.userProfile.name} - ${response.userProfile.id}`, process.env.SECRET);
+        return;
+    }
+
+    const directions = await getDirectionsByViberUserId(response.userProfile.id);
+
+    if(!directions) {
+        response.send(new TextMessage(`Ошибка получения вашего списка городов`));
+        // @ts-ignore
+        await sendServiceMessage(`viber: Ошибка получения списка городов у ${response.userProfile.name} - ${response.userProfile.id}`, process.env.SECRET);
+        return;
+    } else {
+        response.send(new TextMessage(`Вы подписаны на города: ${directions.join(', ')}`));
+    }
+
+    // response.send(message);
+});
 
 const getViberUserIdsByDirection = async (direction) => {
     let items;
@@ -167,43 +209,6 @@ app.post('/inventory', async (req, res) => {
     }
 
     res.status(200).send();
-});
-
-const bot = new ViberBot({
-    authToken: process.env.TOKEN,
-    name: "Описи",
-    avatar: "http://viber.com/avatar.jpg" // It is recommended to be 720x720, and no more than 100kb.
-});
-
-bot.on(BotEvents.MESSAGE_RECEIVED, async(message, response) => {
-    console.log('----------------------------------------------------------------');
-    console.log(`${new Date().toLocaleString('ru')} New message: `, message.text);
-    console.log('From: ', response.userProfile.id, );
-    console.log('Name: ', response.userProfile.name);
-
-    bot.sendMessage({id: process.env.ADMIN_ID}, new TextMessage(`New message from user: ${response.userProfile.id} ${response.userProfile.name}: ${message.text}`));
-
-    const newItem = await addAndDeleteViberUserIdToDirection(response.userProfile.id, message.text);
-
-    if(!newItem) {
-        response.send(new TextMessage(`Ошибка добавления города`));
-        // @ts-ignore
-        await sendServiceMessage(`viber-inventories: Ошибка получения/добавления города у ${response.userProfile.name} - ${response.userProfile.id}`, process.env.SECRET);
-        return;
-    }
-
-    const directions = await getDirectionsByViberUserId(response.userProfile.id);
-
-    if(!directions) {
-        response.send(new TextMessage(`Ошибка получения вашего списка городов`));
-        // @ts-ignore
-        await sendServiceMessage(`viber: Ошибка получения списка городов у ${response.userProfile.name} - ${response.userProfile.id}`, process.env.SECRET);
-        return;
-    } else {
-        response.send(new TextMessage(`Вы подписаны на города: ${directions.join(', ')}`));
-    }
-
-    // response.send(message);
 });
 
 
