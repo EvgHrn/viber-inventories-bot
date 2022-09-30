@@ -184,11 +184,11 @@ const sendServiceMessage = async (messageText, st) => {
 const app = express();
 
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.json())
+//app.use(express.json());
+//app.use(express.urlencoded({ extended: false }));
+//app.use(cookieParser());
+//app.use(express.static(path.join(__dirname, 'public')));
+//app.use(bodyParser.json())
 
 app.use("/viber/webhook", bot.middleware());
 
@@ -198,7 +198,7 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.post('/inventory', async (req, res) => {
+app.post('/inventory', bodyParser.json(), async (req, res) => {
 
     console.log(`${new Date().toLocaleString('ru')} Post package inventory: `, req.body.direction, req.body.inventoryStr);
 
