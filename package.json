@@ -14,7 +14,7 @@
     "morgan": "~1.9.1",
     "node-fetch": "^2.6.6",
     "viber-bot": "^1.0.18",
-    "winston": "^3.8.2",
+    "winston": "^2.4.6",
     "winston-console-formatter": "^1.0.0-beta.3"
   }
 }
