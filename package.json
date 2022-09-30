@@ -1,0 +1,18 @@
+{
+  "name": "viber-inventories-bot",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^16.0.3",
+    "express": "~4.16.1",
+    "mongoose": "^6.6.2",
+    "morgan": "~1.9.1",
+    "node-fetch": "^2.6.6",
+    "viber-bot": "^1.0.18"
+  }
+}
