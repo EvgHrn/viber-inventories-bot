@@ -100,7 +100,7 @@ const getViberUserIdsByDirection = async (direction) => {
         return null;
     }
     if(!items) return null;
-    return items.length ? items[0].viber_user_ids : [];
+    return items.length ? items[0].viber_user_ids : null;
 }
 
 const addAndDeleteViberUserIdToDirection = async (userId, direction) => {
