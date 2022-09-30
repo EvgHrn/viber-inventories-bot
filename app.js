@@ -10,6 +10,8 @@ const mongoose = require('mongoose');
 const nodeFetch = require('node-fetch');
 const bodyParser = require("body-parser");
 
+require('dotenv').config();
+
 const user = process.env.DB_USER;
 const pwd = process.env.DB_PWD;
 const dbPort = process.env.DB_PORT;
@@ -55,7 +57,7 @@ bot.on(BotEvents.MESSAGE_RECEIVED, async(message, response) => {
     const newItem = await addAndDeleteViberUserIdToDirection(response.userProfile.id, message.text);
 
     if(!newItem) {
-        response.send(new TextMessage(`Ошибка добавления города`));
+        bot.sendMessage({id: response.userProfile.id}, new TextMessage(`Ошибка добавления города`));
         // @ts-ignore
         await sendServiceMessage(`viber-inventories: Ошибка получения/добавления города у ${response.userProfile.name} - ${response.userProfile.id}`, process.env.SECRET);
         return;
@@ -64,12 +66,12 @@ bot.on(BotEvents.MESSAGE_RECEIVED, async(message, response) => {
     const directions = await getDirectionsByViberUserId(response.userProfile.id);
 
     if(!directions) {
-        response.send(new TextMessage(`Ошибка получения вашего списка городов`));
+        bot.sendMessage({id: response.userProfile.id}, new TextMessage(`Ошибка получения вашего списка городов`));
         // @ts-ignore
         await sendServiceMessage(`viber: Ошибка получения списка городов у ${response.userProfile.name} - ${response.userProfile.id}`, process.env.SECRET);
         return;
     } else {
-        response.send(new TextMessage(`Вы подписаны на города: ${directions.join(', ')}`));
+        bot.sendMessage({id: response.userProfile.id}, new TextMessage(`Вы подписаны на города: ${directions.join(', ')}`));
     }
 
     // response.send(message);

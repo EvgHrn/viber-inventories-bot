@@ -7,7 +7,7 @@
 const app = require('../app');
 const debug = require('debug')('viber-inventories-bot:server');
 const https = require('https');
-
+const fs = require('fs');
 
 require('dotenv').config();
 
