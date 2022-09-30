@@ -179,6 +179,12 @@ app.use(bodyParser.json())
 
 app.use("/viber/webhook", bot.middleware());
 
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization");
+    next();
+});
+
 app.post('/inventory', async (req, res) => {
 
     console.log(`${new Date().toLocaleString('ru')} Post package inventory: `, req.body.direction, req.body.inventoryStr);
