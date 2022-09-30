@@ -9,6 +9,8 @@ const logger = require('morgan');
 const mongoose = require('mongoose');
 const nodeFetch = require('node-fetch');
 const bodyParser = require("body-parser");
+const winston = require('winston');
+const toYAML = require('winston-console-formatter'); // makes the output more friendly
 
 require('dotenv').config();
 
@@ -40,7 +42,18 @@ const inventoriesViberMailingSchema = new mongoose.Schema({
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 const InventoriesViberMailing = mongoose.model('InventoriesViberMailing', inventoriesViberMailingSchema);
 
+const createLogger = () => {
+    const logger = new winston.Logger({
+        level: "debug"
+    }); // We recommend DEBUG for development
+    logger.add(winston.transports.Console, toYAML.config());
+    return logger;
+}
+
+const loggerViber = createLogger();
+
 const bot = new ViberBot({
+    logger: loggerViber,
     authToken: process.env.TOKEN,
     name: "Описи",
     avatar: "http://viber.com/avatar.jpg" // It is recommended to be 720x720, and no more than 100kb.
