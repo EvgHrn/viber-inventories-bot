@@ -93,7 +93,7 @@ bot.on(BotEvents.MESSAGE_RECEIVED, async(message, response) => {
 const getViberUserIdsByDirection = async (direction) => {
     let items;
     try {
-        items = await InventoriesViberMailing.find({direction}).exec();
+        items = await InventoriesViberMailing.find({direction: direction.toLowerCase()}).exec();
         console.log(`${new Date().toLocaleString('ru')} Getting viber user ids by direction result: `, items);
     } catch (e) {
         console.log(`${new Date().toLocaleString('ru')} Getting viber user ids by direction error: `, e);
@@ -104,12 +104,12 @@ const getViberUserIdsByDirection = async (direction) => {
 }
 
 const addAndDeleteViberUserIdToDirection = async (userId, direction) => {
-    const viberUserIds = await getViberUserIdsByDirection(direction);
+    const viberUserIds = await getViberUserIdsByDirection(direction.toLowerCase());
     if(!viberUserIds) {
         console.log(`${new Date().toLocaleString('ru')} Gonna add userId to direction: `, userId, direction);
         let result;
         try {
-            const newItem = new InventoriesViberMailing({direction, viber_user_ids: [userId]});
+            const newItem = new InventoriesViberMailing({direction: direction.toLowerCase(), viber_user_ids: [userId]});
             result = await newItem.save();
             console.log(`${new Date().toLocaleString('ru')} Direction added with result: `, result);
         } catch(err) {
@@ -128,7 +128,7 @@ const addAndDeleteViberUserIdToDirection = async (userId, direction) => {
         let item;
         try {
             console.log(`${new Date().toLocaleString('ru')} Gonna update ${direction} with new ids: `, newIds);
-            item = await InventoriesViberMailing.findOneAndUpdate({direction}, {viber_user_ids: newIds}, {new: true}).exec();
+            item = await InventoriesViberMailing.findOneAndUpdate({direction: direction.toLowerCase()}, {viber_user_ids: newIds}, {new: true}).exec();
             console.log(`${new Date().toLocaleString('ru')} Updating viber user ids on ${direction} result: `, item);
             return item;
         } catch (e) {
@@ -159,16 +159,10 @@ const sendServiceMessage = async (messageText, st) => {
 
     try {
         const response = await nodeFetch(url, {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-            // mode: 'cors', // no-cors, *cors, same-origin
-            // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-            // credentials: 'same-origin', // include, *same-origin, omit
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-                // 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            // redirect: 'follow', // manual, *follow, error
-            // referrerPolicy: 'no-referrer', // no-referrer, *client
             body: JSON.stringify({ messageText, st }) // body data type must match "Content-Type" header
         });
         return await response.json(); // parses JSON response into native JavaScript objects
@@ -178,17 +172,9 @@ const sendServiceMessage = async (messageText, st) => {
     }
 };
 
-// var indexRouter = require('./routes/index');
-// var usersRouter = require('./routes/users');
-
 const app = express();
 
 app.use(logger('dev'));
-//app.use(express.json());
-//app.use(express.urlencoded({ extended: false }));
-//app.use(cookieParser());
-//app.use(express.static(path.join(__dirname, 'public')));
-//app.use(bodyParser.json())
 
 app.use("/viber/webhook", bot.middleware());
 
@@ -202,7 +188,7 @@ app.post('/inventory', bodyParser.json(), async (req, res) => {
 
     console.log(`${new Date().toLocaleString('ru')} Post package inventory: `, req.body.direction, req.body.inventoryStr);
 
-    const usersIds = await getViberUserIdsByDirection(req.body.direction);
+    const usersIds = await getViberUserIdsByDirection(req.body.direction.toLowerCase());
 
     if(!usersIds) {
         console.error(`${new Date().toLocaleString('ru')} Getting viber user ids by direction error`);
@@ -231,10 +217,6 @@ app.post('/inventory', bodyParser.json(), async (req, res) => {
 
     res.status(200).send();
 });
-
-
-// app.use('/', indexRouter);
-// app.use('/users', usersRouter);
 
 module.exports.app = app;
 module.exports.bot = bot;
